@@ -10,8 +10,25 @@ var Marker = function(start, end, note) {
 }
 
 
-function markerTest() {
+function markerTest(audio,list) {
+  console.log(list);
+  var content_body = document.getElementById("content");
+  var li = document.createElement("li");
+  for(var i = 0; i < list.length; i++) {
+    var ul = document.createElement("ul");
+    var node = document.createTextNode(i+". "+list[i].note);
+    var btn = document.createElement("button");
+    btn.innerText = "Play Subclip";
+    var test = list[i].start;
+    btn.onclick = function() {
 
+      audio.currentTime= test;
+    };
+    ul.appendChild(node);
+    ul.appendChild(btn);
+    li.appendChild(ul);
+  }
+  content_body.appendChild(li);
 }
 function printToFile(data) {
   var link = document.createElement('a');
@@ -145,4 +162,5 @@ function download(audio, list) {
   console.log(text_url);
   document.getElementById("content").appendChild(li);
   testPlayback(au,text);
+  markerTest(au,list);
 }
