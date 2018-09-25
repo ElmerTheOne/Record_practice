@@ -2,6 +2,89 @@ var time = 0;
 var marks = "";
 var input = [document.getElementById("seconds"),document.getElementById("note"),document.getElementById("submit")]
 var marker_list = [];
+let dropArea = document.getElementById('drop-area');
+
+function handleFiles(files) {
+  ([...files]).forEach(uploadFile)
+}
+
+function setAudio(file) {
+
+  console.log("file");
+  var url = URL.createObjectURL(file);
+  var au = document.createElement('audio');
+  au.id = "testAudio";
+  var content_body = document.getElementById("audio_elem");
+  au.src = url;
+  au.controls = true;
+  content_body.appendChild(au);
+}
+
+function setList(file) {
+  console.log(file);
+
+  var reader = new FileReader();
+  reader.readAsText(file, "utf-8");
+  reader.onload = function(e) {
+    marker_list = JSON.parse(reader.result);
+    console.log(marker_list);
+    markerTestFromScratch(null, marker_list);
+  }
+}
+
+
+function uploadFile(file) {
+  var fileEnding = file.name.match(/\.txt|.ogg/g);
+  var type;
+  if(fileEnding != null) {
+    //  Last elem if there are multiple hits on the pattern
+    type = fileEnding[fileEnding.length-1];
+    console.log(type);
+    if(type == ".txt") {
+      console.log("text");
+      setList(file);
+    } else {
+      setAudio(file);
+    }
+
+
+
+  } else {
+    alert("That filetype is not supported.");
+  }
+}
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, preventDefaults, false)
+})
+;['dragenter', 'dragover'].forEach(eventName => {
+  dropArea.addEventListener(eventName, highlight, false)
+})
+
+;['dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, unhighlight, false)
+})
+
+dropArea.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+  let dt = e.dataTransfer;
+  let files = dt.files;
+  handleFiles(files);
+}
+
+function highlight(e) {
+  dropArea.classList.add('highlight');
+}
+
+function unhighlight(e) {
+  dropArea.classList.remove('highlight');
+}
+
+function preventDefaults (e) {
+  e.preventDefault();
+  e.stopPropagation();
+}
 
 var Marker = function(start, end, note) {
   this.start = start;
@@ -30,6 +113,76 @@ function markerTest(audio,list) {
   }
   content_body.appendChild(li);
 }
+
+function markerTestFromScratch(audio, list) {
+  var content_body = document.getElementById("content");
+  var audioDiv = document.getElementById("audio_elem");
+
+  if(audioDiv.children.length == 0) {
+
+    audioDiv.addEventListener('DOMNodeInserted',function() {
+      console.log("ri");
+      var audio = document.getElementsByTagName("audio")[0];
+      var content_body = document.getElementById("content");
+      var list = marker_list;
+      var li = document.createElement("li");
+      for(var i = 0; i < list.length; i++) {
+        var ul = document.createElement("ul");
+        var node = document.createTextNode(i+". "+list[i].note);
+        var btn = document.createElement("button");
+        btn.innerText = "Play Subclip";
+        var test = list[i].start;
+        btn.onclick = function() {
+
+          audio.currentTime= test;
+        };
+        ul.appendChild(node);
+        ul.appendChild(btn);
+        li.appendChild(ul);
+      }
+      content_body.appendChild(li);
+    });
+  } else{
+    console.log("ri");
+    var audio = document.getElementsByTagName("audio")[0];
+    var content_body = document.getElementById("content");
+    var list = marker_list;
+    var li = document.createElement("li");
+    for(var i = 0; i < list.length; i++) {
+      var ul = document.createElement("ul");
+      var node = document.createTextNode(i+". "+list[i].note);
+      var btn = document.createElement("button");
+      btn.innerText = "Play Subclip";
+      var test = list[i].start;
+      btn.onclick = function() {
+
+        audio.currentTime= test;
+      };
+      ul.appendChild(node);
+      ul.appendChild(btn);
+      li.appendChild(ul);
+    }
+    content_body.appendChild(li);
+  }
+
+  // var li = document.createElement("li");
+  // for(var i = 0; i < list.length; i++) {
+  //   var ul = document.createElement("ul");
+  //   var node = document.createTextNode(i+". "+list[i].note);
+  //   var btn = document.createElement("button");
+  //   btn.innerText = "Play Subclip";
+  //   var test = list[i].start;
+  //   btn.onclick = function() {
+  //
+  //     audio.currentTime= test;
+  //   };
+  //   ul.appendChild(node);
+  //   ul.appendChild(btn);
+  //   li.appendChild(ul);
+  // }
+  // content_body.appendChild(li);
+}
+
 function printToFile(data) {
   var link = document.createElement('a');
   link.download = '';
@@ -102,12 +255,21 @@ One chunk should be roughly 1024 samples
 */
 
 function mark() {
+  var audio_element = document.getElementsByTagName("audio");
+  var currentTime;
+  console.log(audio_element);
+  if(audio_element.length == 1) {
+    currentTime = audio_elem.children[0].currentTime;
+  } else {
+    currentTime = time;
+  }
   for(var i = 0; i < input.length; i++) {
     input[i].disabled = false;
   }
-  var currentTime = time;
-  input[2].onclick = function() {
 
+  input[2].onclick = function() {
+    console.log(audio_element.length);
+    console.log(currentTime);
     var offset = input[0].value;
     var note = input[1].value;
     if(offset != null && offset > 0) {
@@ -115,15 +277,56 @@ function mark() {
         input[i].disabled = true;
         input[i].value = null;
       }
-      if(time-offset > 0) {
-        var marker = new Marker(currentTime - offset, currentTime, note);
+    }
+    if(currentTime-offset > 0) {
+      var marker = new Marker(currentTime - offset, currentTime, note);
+      console.log()
+      marker_list.push(marker);
+      if(audio_element.length == 1) {
+        console.log("adding markers");
+        addMarker(audio_element[0],marker_list);
+      } else {  // If start is out of bounds
+        var marker = new Marker(0, currentTime, note);
         marker_list.push(marker);
+        if(audio_element.length == 1) {
+          console.log("adding markers");
+          addMarker(audio_element[0],marker_list);
+        }
       }
     }
 
 
   };
 }
+
+
+function addMarker(audio, list) {
+
+  var content_body = document.getElementById("content");
+  var previous = content_body.getElementsByTagName("li");
+  console.log(previous);
+  if(previous.length == 1) {
+    previous[0].remove();
+  }
+  var li = document.createElement("li");
+  for(var i = 0; i < list.length; i++) {
+    var ul = document.createElement("ul");
+    var node = document.createTextNode(i+". "+list[i].note);
+    var btn = document.createElement("button");
+    btn.innerText = "Play Subclip";
+    var test = list[i].start;
+    btn.onclick = function() {
+
+      audio.currentTime= test;
+    };
+    ul.appendChild(node);
+    ul.appendChild(btn);
+    li.appendChild(ul);
+  }
+  content_body.appendChild(li);
+}
+
+
 
 function testPlayback(audio, text) {
   var reader = new FileReader();

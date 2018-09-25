@@ -4,10 +4,10 @@
 <head>
   <meta charset="utf-8">
 
-  <title>Asdasd</title>
+  <title>Record Your practice</title>
   <meta name="description" content="The HTML5 Herald">
   <meta name="author" content="SitePoint">
-
+  <link rel="stylesheet" href="css.css" >
   <!-- <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
 
 </head>
@@ -26,6 +26,18 @@
   <div id="timer"></div>
 </br>
   <div id="content">
+    <div id="audio_elem">
+    </div>
+  </div>
+  <div id="files">
+    <div id=drop-area>
+      <form class="my-form">
+        <p>Upload your sound and text file with the file dialog or by dragging and dropping images onto the dashed region</p>
+        <input type="file" id="fileElem" multiple accept="audio/*|.txt" onchange="handleFiles(this.files)">
+        <label class="button" for="fileElem">Select some files</label>
+      </form>
+</div>
+</div>
 
   </div>
 <script src="script.js"></script>
