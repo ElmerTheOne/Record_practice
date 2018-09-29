@@ -94,10 +94,11 @@ var Marker = function(start, end, note) {
 
 
 function markerTest(audio,list) {
-  console.log(list);
+  console.log(marker_list);
   var content_body = document.getElementById("content");
   var li = document.createElement("li");
   for(var i = 0; i < list.length; i++) {
+    console.log("append");
     var ul = document.createElement("ul");
     var node = document.createTextNode(i+". "+list[i].note);
     var btn = document.createElement("button");
@@ -281,7 +282,7 @@ function mark() {
     if(currentTime-offset > 0) {
       var marker = new Marker(currentTime - offset, currentTime, note);
       console.log()
-      marker_list.push(marker);
+
       if(audio_element.length == 1) {
         console.log("adding markers");
         addMarker(audio_element[0],marker_list);
@@ -310,6 +311,7 @@ function addMarker(audio, list) {
   }
   var li = document.createElement("li");
   for(var i = 0; i < list.length; i++) {
+    console.log("hey append");
     var ul = document.createElement("ul");
     var node = document.createTextNode(i+". "+list[i].note);
     var btn = document.createElement("button");
@@ -335,7 +337,6 @@ function testPlayback(audio, text) {
 
   }
   reader.readAsText(text);
-
 
 }
 
