@@ -260,8 +260,10 @@ function mark() {
   var currentTime;
   console.log(audio_element);
   if(audio_element.length == 1) {
+    console.log("This branch");
     currentTime = audio_elem.children[0].currentTime;
   } else {
+    console.log("What time is it " + time);
     currentTime = time;
   }
   for(var i = 0; i < input.length; i++) {
@@ -269,6 +271,7 @@ function mark() {
   }
 
   input[2].onclick = function() {
+
     console.log(audio_element.length);
     console.log(currentTime);
     var offset = input[0].value;
@@ -281,6 +284,21 @@ function mark() {
     }
     if(currentTime-offset > 0) {
       var marker = new Marker(currentTime - offset, currentTime, note);
+      console.log(currentTime)
+
+      if(audio_element.length == 1) {
+        console.log("adding markers");
+        addMarker(audio_element[0],marker_list);
+      } else {  // If start is out of bounds
+        var marker = new Marker(currentTime-offset, currentTime, note);
+        marker_list.push(marker);
+        if(audio_element.length == 1) {
+          console.log("adding markers");
+          addMarker(audio_element[0],marker_list);
+        }
+      }
+    } else {
+      var marker = new Marker(0, currentTime, note);
       console.log()
 
       if(audio_element.length == 1) {
